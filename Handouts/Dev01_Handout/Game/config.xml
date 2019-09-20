@@ -1,5 +1,19 @@
 <!--Config file for the game-->
 
 <config>
-	<title>My super awesome game with XML</title>
+	<modules>
+		<window>
+      <title>My super awesome game with XML</title>
+      <FULLSCREEN value="false"/>
+      <BORDERLESS value="false"/>
+      <RESIZABLE value="true"/>
+      <FULLSCREEN_WINDOW value="false"/>
+      <TITLE value="My super awesome game with XML"/>
+      <WIDTH value="1024"/>
+      <HEIGHT value="768"/>
+      <SCALE value="1"/>
+    </window>
+	</modules>
+
 </config>
+

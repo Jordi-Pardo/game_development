@@ -7,6 +7,7 @@
 #define __j1MODULE_H__
 
 #include "p2SString.h"
+#include "PugiXml\src\pugixml.hpp"
 
 class j1App;
 
@@ -23,8 +24,15 @@ public:
 	}
 
 	// Called before render is available
-	virtual bool Awake()
+	virtual bool Awake(pugi::xml_node * n)
 	{
+		if (!n->empty()) {
+			if(!n->child("modules").child(name.GetString()).empty())
+			{
+			node = n;
+			}
+		}
+		
 		return true;
 	}
 
@@ -62,6 +70,7 @@ public:
 
 	p2SString	name;
 	bool		active;
+	pugi::xml_node* node = nullptr;
 
 };
 

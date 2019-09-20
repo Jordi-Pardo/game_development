@@ -34,7 +34,7 @@ int main(int argc, char* args[])
 	{
 		switch(state)
 		{
-
+			
 			// Allocate the engine --------------------------------------------
 			case CREATE:
 			LOG("CREATION PHASE ===============================");
@@ -52,6 +52,7 @@ int main(int argc, char* args[])
 			case AWAKE:
 			LOG("AWAKE PHASE ===============================");
 			if(App->Awake() == true)
+				
 				state = START;
 			else
 			{

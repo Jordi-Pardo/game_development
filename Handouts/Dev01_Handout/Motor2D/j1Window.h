@@ -16,7 +16,7 @@ public:
 	virtual ~j1Window();
 
 	// Called before render is available
-	bool Awake();
+	bool Awake(pugi::xml_node * node);
 
 	// Called before quitting
 	bool CleanUp();
@@ -41,6 +41,7 @@ private:
 	uint		width;
 	uint		height;
 	uint		scale;
+	
 };
 
 #endif // __j1WINDOW_H__

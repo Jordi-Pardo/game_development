@@ -10,6 +10,7 @@
 #include "j1App.h"
 
 
+
 // Constructor
 j1App::j1App(int argc, char* args[]) : argc(argc), args(args)
 {
@@ -64,8 +65,10 @@ bool j1App::Awake()
 	pugi::xml_parse_result result = doc.load_file("config.xml");
 
 	if (result) {
-		
-		node.name();
+		node = doc.document_element();
+	}
+	else {
+		LOG(result.description());
 	}
 
 	bool ret = true;
@@ -80,12 +83,13 @@ bool j1App::Awake()
 		// that can be used to read all variables for that module.
 		// Send nullptr if the node does not exist in config.xml
 
-		ret = item->data->Awake();
+		ret = item->data->Awake(&node);
 		item = item->next; 
 	}
 	 
 	// TODO 4: Read the title from the config file
 	// and set the window title using win->SetTitle()
+
 
 	return ret;
 }
