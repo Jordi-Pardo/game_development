@@ -25,14 +25,7 @@ public:
 
 	// Called before render is available
 	virtual bool Awake(pugi::xml_node * n)
-	{
-		if (!n->empty()) {
-			if(!n->child("modules").child(name.GetString()).empty())
-			{
-			node = n;
-			}
-		}
-		
+	{		
 		return true;
 	}
 

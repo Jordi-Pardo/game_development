@@ -19,10 +19,18 @@ j1Window::~j1Window()
 }
 
 // Called before render is available
-bool j1Window::Awake(pugi::xml_node * node)
+bool j1Window::Awake(pugi::xml_node * n)
 {
-	if (!node->empty())
-		App->win->SetTitle(node->child("modules").child("window").child("title").child_value());
+	p2SString title;
+	if (!n->empty()) {
+		if (!n->child("modules").child(name.GetString()).empty())
+		{
+			node = &n->child("modules").child(name.GetString());
+			title.create(node->child("TITLE").attribute("value").value());
+		}
+	}
+	/*if (!node->empty())
+		App->win->SetTitle(node->child("modules").child("window").child("title").child_value());*/
 	LOG("Init SDL window & surface");
 	bool ret = true;
 
@@ -63,8 +71,8 @@ bool j1Window::Awake(pugi::xml_node * node)
 
 		//TODO 7: Move "Todo 4" code to the awake method on the window module
 		//Pass the title as a variable when creating the window
-		window = SDL_CreateWindow(TITLE, SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, width, height, flags);
-		App->win->SetTitle(node->child("modules").child("window").child("title").child_value());
+		window = SDL_CreateWindow(title.GetString(), SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, width, height, flags);
+		//App->win->SetTitle(node->child("modules").child("window").child("title").child_value());
 		if(window == NULL)
 		{
 			LOG("Window could not be created! SDL_Error: %s\n", SDL_GetError());
