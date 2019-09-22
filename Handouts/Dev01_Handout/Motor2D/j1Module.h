@@ -59,6 +59,17 @@ public:
 		return true;
 	}
 
+	pugi::xml_node * SetNode(pugi::xml_node * n) const{
+		if (!n->empty()) {
+			if (!n->child("modules").child(name.GetString()).empty())
+			{
+				LOG(name.GetString());
+				return &n->child("modules").child(name.GetString());
+			}
+		}
+		return nullptr;
+	}
+
 public:
 
 	p2SString	name;

@@ -69,9 +69,10 @@ public:
 	j1Audio*			audio;
 	j1Scene*			scene;
 
+private:
+
 	pugi::xml_document doc;
 	pugi::xml_node node;
-private:
 
 	p2List<j1Module*>	modules;
 	uint				frames;
