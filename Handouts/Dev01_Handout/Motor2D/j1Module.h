@@ -59,7 +59,7 @@ public:
 		return true;
 	}
 
-	pugi::xml_node * SetNode(pugi::xml_node * n) const{
+	pugi::xml_node * SetNode(pugi::xml_node * n) {
 		if (!n->empty()) {
 			if (!n->child("modules").child(name.GetString()).empty())
 			{

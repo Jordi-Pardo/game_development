@@ -19,8 +19,17 @@ j1Audio::~j1Audio()
 {}
 
 // Called before render is available
-bool j1Audio::Awake(pugi::xml_node* node)
+bool j1Audio::Awake(pugi::xml_node* n)
 {
+	if (n != nullptr) {
+		if (!n->child("modules").child(name.GetString()).empty())
+		{
+			node = &n->child("modules").child(name.GetString());
+		}
+	}
+
+	music_Volume = node->child("MUSIC_VOLUME").attribute("value").as_int();
+
 	LOG("Loading Audio Mixer");
 	bool ret = true;
 	SDL_Init(0);
@@ -95,7 +104,9 @@ bool j1Audio::PlayMusic(const char* path, float fade_time)
 		}
 		else
 		{
+
 			Mix_HaltMusic();
+		
 		}
 
 		// this call blocks until fade out is done
@@ -128,7 +139,7 @@ bool j1Audio::PlayMusic(const char* path, float fade_time)
 			}
 		}
 	}
-
+	Mix_VolumeMusic(music_Volume);
 	LOG("Successfully playing %s", path);
 	return ret;
 }
@@ -166,8 +177,9 @@ bool j1Audio::PlayFx(unsigned int id, int repeat)
 
 	if(id > 0 && id <= fx.count())
 	{
+		Mix_VolumeChunk(fx[id - 1], 0);
 		Mix_PlayChannel(-1, fx[id - 1], repeat);
 	}
-
+	
 	return ret;
 }

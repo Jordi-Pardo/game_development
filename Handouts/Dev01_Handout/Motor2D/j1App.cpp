@@ -82,8 +82,12 @@ bool j1App::Awake()
 		// If the section with the module name exists in config.xml, fill the pointer with the valid xml_node
 		// that can be used to read all variables for that module.
 		// Send nullptr if the node does not exist in config.xml
-
-		ret = item->data->Awake(&node);
+		if (!node.empty()) {
+			ret = item->data->Awake(&node);
+		}
+		else {
+			ret = item->data->Awake(nullptr);
+		}
 		item = item->next; 
 	}
 	 

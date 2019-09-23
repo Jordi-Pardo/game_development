@@ -23,12 +23,15 @@ bool j1Window::Awake(pugi::xml_node * n)
 {
 	p2SString title;
 	
-	if (!n->empty()) {
+	if (n != nullptr) {
 		if (!n->child("modules").child(name.GetString()).empty())
 		{
 			node = &n->child("modules").child(name.GetString());
 		}
 	}
+
+	pugi::xml_node* node1 = SetNode(n);
+	pugi::xml_node* node2 = &n->child("modules").child(name.GetString());
 	title.create(node->child("TITLE").attribute("value").value());
 	
 	LOG("Init SDL window & surface");
@@ -48,22 +51,27 @@ bool j1Window::Awake(pugi::xml_node * n)
 		height = node->child("HEIGHT").attribute("value").as_int();
 		scale = node->child("SCALE").attribute("value").as_int();
 
-		if(node->child("FULLSCREEN").attribute("value").as_bool())
+		fullscreen = node->child("FULLSCREEN").attribute("value").as_bool();
+		borderless = node->child("BORDERLESS").attribute("value").as_bool();
+		resizable = node->child("RESIZABLE").attribute("value").as_bool();
+		fullscreen_window = node->child("FULLSCREEN_WINDOW").attribute("value").as_bool();
+
+		if(fullscreen)
 		{
 			flags |= SDL_WINDOW_FULLSCREEN;
 		}
 
-		if(node->child("BORDERLESS").attribute("value").as_bool())
+		if(borderless)
 		{
 			flags |= SDL_WINDOW_BORDERLESS;
 		}
 
-		if(node->child("RESIZABLE").attribute("value").as_bool())
+		if(resizable)
 		{
 			flags |= SDL_WINDOW_RESIZABLE;
 		}
 
-		if(node->child("FULLSCREEN_WINDOW").attribute("value").as_bool())
+		if(fullscreen_window)
 		{
 			flags |= SDL_WINDOW_FULLSCREEN_DESKTOP;
 		}
