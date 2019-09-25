@@ -50,7 +50,7 @@ bool j1Audio::Awake(pugi::xml_node& config)
 		active = false;
 		ret = true;
 	}
-
+	volume = config.child("volume").attribute("default_value").as_int();
 	return ret;
 }
 
@@ -130,6 +130,7 @@ bool j1Audio::PlayMusic(const char* path, float fade_time)
 		}
 	}
 
+	SetVolume(volume);
 	LOG("Successfully playing %s", path);
 	return ret;
 }
@@ -171,4 +172,37 @@ bool j1Audio::PlayFx(unsigned int id, int repeat)
 	}
 
 	return ret;
+}
+
+void j1Audio::UpVolume()
+{
+	if (volume < MIX_MAX_VOLUME) {
+		volume += 8;
+		SetVolume(volume);
+	}
+}
+
+void j1Audio::DownVolume()
+{
+	if (volume > 0) {
+		volume -= 8;
+		SetVolume(volume);
+	}
+}
+
+void j1Audio::SetVolume(int value)
+{
+	volume = value;
+	Mix_VolumeMusic(volume);
+}
+
+void j1Audio::Save(pugi::xml_node& node)
+{
+	node.append_child("volume").append_attribute("value").set_value(volume);
+}
+
+void j1Audio::Load(pugi::xml_node& node)
+{
+	SetVolume(node.child("volume").attribute("value").as_int());
+	LOG("%i", volume);
 }

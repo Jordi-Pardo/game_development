@@ -43,6 +43,14 @@ bool j1Scene::PreUpdate()
 // Called each loop iteration
 bool j1Scene::Update(float dt)
 {
+	if (App->input->GetKey(SDL_SCANCODE_KP_PLUS) == KEY_DOWN)
+	{
+		App->audio->UpVolume();
+	}
+	if (App->input->GetKey(SDL_SCANCODE_KP_MINUS) == KEY_DOWN)
+	{
+		App->audio->DownVolume();
+	}
 	// TODO 3: Call load / save methods when pressing L/S
 	//SAVE
 	if (App->input->GetKey(SDL_SCANCODE_S) == KEY_DOWN) 
