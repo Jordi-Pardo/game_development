@@ -19,13 +19,8 @@ j1Window::~j1Window()
 }
 
 // Called before render is available
-bool j1Window::Awake(pugi::xml_node * n)
+bool j1Window::Awake(pugi::xml_node& config)
 {
-	p2SString title;
-
-	if(n!= nullptr)
-	title.create(n->child("TITLE").attribute("value").value());
-	
 	LOG("Init SDL window & surface");
 	bool ret = true;
 
@@ -38,41 +33,37 @@ bool j1Window::Awake(pugi::xml_node * n)
 	{
 		//Create window
 		Uint32 flags = SDL_WINDOW_SHOWN;
+		bool fullscreen = config.child("fullscreen").attribute("value").as_bool(false);
+		bool borderless = config.child("borderless").attribute("value").as_bool(false);
+		bool resizable = config.child("resizable").attribute("value").as_bool(false);
+		bool fullscreen_window = config.child("fullscreen_window").attribute("value").as_bool(false);
 
-		width = n->child("WIDTH").attribute("value").as_int();
-		height = n->child("HEIGHT").attribute("value").as_int();
-		scale = n->child("SCALE").attribute("value").as_int();
+		width = config.child("resolution").attribute("width").as_int(640);
+		height = config.child("resolution").attribute("height").as_int(480);
+		scale = config.child("resolution").attribute("scale").as_int(1);
 
-		fullscreen = n->child("FULLSCREEN").attribute("value").as_bool();
-		borderless = n->child("BORDERLESS").attribute("value").as_bool();
-		resizable = n->child("RESIZABLE").attribute("value").as_bool();
-		fullscreen_window = n->child("FULLSCREEN_WINDOW").attribute("value").as_bool();
-
-		if(fullscreen)
+		if(fullscreen == true)
 		{
 			flags |= SDL_WINDOW_FULLSCREEN;
 		}
 
-		if(borderless)
+		if(borderless == true)
 		{
 			flags |= SDL_WINDOW_BORDERLESS;
 		}
 
-		if(resizable)
+		if(resizable == true)
 		{
 			flags |= SDL_WINDOW_RESIZABLE;
 		}
 
-		if(fullscreen_window)
+		if(fullscreen_window == true)
 		{
 			flags |= SDL_WINDOW_FULLSCREEN_DESKTOP;
 		}
 
+		window = SDL_CreateWindow(App->GetTitle(), SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, width, height, flags);
 
-		//TODO 7: Move "Todo 4" code to the awake method on the window module
-		//Pass the title as a variable when creating the window
-		window = SDL_CreateWindow(title.GetString(), SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, width, height, flags);
-		//App->win->SetTitle(node->child("modules").child("window").child("title").child_value());
 		if(window == NULL)
 		{
 			LOG("Window could not be created! SDL_Error: %s\n", SDL_GetError());
@@ -82,7 +73,6 @@ bool j1Window::Awake(pugi::xml_node * n)
 		{
 			//Get window surface
 			screen_surface = SDL_GetWindowSurface(window);
-
 		}
 	}
 
@@ -108,6 +98,7 @@ bool j1Window::CleanUp()
 // Set new window title
 void j1Window::SetTitle(const char* new_title)
 {
+	//title.create(new_title);
 	SDL_SetWindowTitle(window, new_title);
 }
 

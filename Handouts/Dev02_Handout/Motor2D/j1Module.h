@@ -24,8 +24,8 @@ public:
 	}
 
 	// Called before render is available
-	virtual bool Awake(pugi::xml_node * n)
-	{		
+	virtual bool Awake(pugi::xml_node&)
+	{
 		return true;
 	}
 
@@ -59,16 +59,9 @@ public:
 		return true;
 	}
 
-	pugi::xml_node * SetNode(pugi::xml_node * n) {
-		if (!n->empty()) {
-			if (!n->child("modules").child(name.GetString()).empty())
-			{
-				LOG(name.GetString());
-				return &n->child("modules").child(name.GetString());
-			}
-		}
-		return nullptr;
-	}
+	// TODO 2: Create new virtual methods to Load and Save
+	virtual void Save(pugi::xml_node&) {};
+	virtual void Load(pugi::xml_node&) {};
 
 public:
 

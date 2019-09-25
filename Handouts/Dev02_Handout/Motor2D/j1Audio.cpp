@@ -19,17 +19,8 @@ j1Audio::~j1Audio()
 {}
 
 // Called before render is available
-bool j1Audio::Awake(pugi::xml_node* n)
+bool j1Audio::Awake(pugi::xml_node& config)
 {
-	if (n != nullptr) {
-		if (!n->child("modules").child(name.GetString()).empty())
-		{
-			n = &n->child("modules").child(name.GetString());
-		}
-	}
-
-	music_Volume = n->child("MUSIC_VOLUME").attribute("value").as_int();
-
 	LOG("Loading Audio Mixer");
 	bool ret = true;
 	SDL_Init(0);
@@ -41,6 +32,7 @@ bool j1Audio::Awake(pugi::xml_node* n)
 		ret = true;
 	}
 
+	// load support for the JPG and PNG image formats
 	int flags = MIX_INIT_OGG;
 	int init = Mix_Init(flags);
 
@@ -104,9 +96,7 @@ bool j1Audio::PlayMusic(const char* path, float fade_time)
 		}
 		else
 		{
-
 			Mix_HaltMusic();
-		
 		}
 
 		// this call blocks until fade out is done
@@ -139,7 +129,7 @@ bool j1Audio::PlayMusic(const char* path, float fade_time)
 			}
 		}
 	}
-	Mix_VolumeMusic(music_Volume);
+
 	LOG("Successfully playing %s", path);
 	return ret;
 }
@@ -177,9 +167,8 @@ bool j1Audio::PlayFx(unsigned int id, int repeat)
 
 	if(id > 0 && id <= fx.count())
 	{
-		Mix_VolumeChunk(fx[id - 1], 0);
 		Mix_PlayChannel(-1, fx[id - 1], repeat);
 	}
-	
+
 	return ret;
 }

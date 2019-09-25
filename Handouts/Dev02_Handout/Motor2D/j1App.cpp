@@ -1,3 +1,6 @@
+#include <iostream> 
+#include <sstream> 
+
 #include "p2Defs.h"
 #include "p2Log.h"
 
@@ -8,8 +11,6 @@
 #include "j1Audio.h"
 #include "j1Scene.h"
 #include "j1App.h"
-
-
 
 // Constructor
 j1App::j1App(int argc, char* args[]) : argc(argc), args(args)
@@ -48,6 +49,8 @@ j1App::~j1App()
 	}
 
 	modules.clear();
+
+	config_file.reset();
 }
 
 void j1App::AddModule(j1Module* module)
@@ -59,41 +62,23 @@ void j1App::AddModule(j1Module* module)
 // Called before render is available
 bool j1App::Awake()
 {
-	// TODO 3: Load config.xml file using load_file() method from the xml_document class.
-	// If everything goes well, load the top tag inside the xml_node property
-	// created in the last TODO
-	pugi::xml_parse_result result = doc.load_file("config.xml");
+	bool ret = LoadConfig();
 
-	if (result) {
-		node = doc.document_element();
-	}
-	else {
-		LOG(result.description());
-	}
+	// self-config
+	title.create(app_config.child("title").child_value());
+	organization.create(app_config.child("organization").child_value());
 
-	bool ret = true;
-
-	p2List_item<j1Module*>* item;
-	item = modules.start;
-
-	while(item != NULL && ret == true)
+	if(ret == true)
 	{
-		// TODO 6: Add a new argument to the Awake method to receive a pointer to an xml node.
-		// If the section with the module name exists in config.xml, fill the pointer with the valid xml_node
-		// that can be used to read all variables for that module.
-		// Send nullptr if the node does not exist in config.xml
-		if (!node.empty()) {
-			ret = item->data->Awake(&node.child("modules").child(item->data->name.GetString()));
-		}
-		else {
-			ret = item->data->Awake(nullptr);
-		}
-		item = item->next; 
-	}
-	 
-	// TODO 4: Read the title from the config file
-	// and set the window title using win->SetTitle()
+		p2List_item<j1Module*>* item;
+		item = modules.start;
 
+		while(item != NULL && ret == true)
+		{
+			ret = item->data->Awake(config.child(item->data->name.GetString()));
+			item = item->next;
+		}
+	}
 
 	return ret;
 }
@@ -136,6 +121,28 @@ bool j1App::Update()
 	return ret;
 }
 
+
+// ---------------------------------------------
+bool j1App::LoadConfig()
+{
+	bool ret = true;
+
+	pugi::xml_parse_result result = config_file.load_file("config.xml");
+
+	if(result == NULL)
+	{
+		LOG("Could not load map xml file config.xml. pugi error: %s", result.description());
+		ret = false;
+	}
+	else
+	{
+		config = config_file.child("config");
+		app_config = config.child("app");
+	}
+
+	return ret;
+}
+
 // ---------------------------------------------
 void j1App::PrepareUpdate()
 {
@@ -144,6 +151,19 @@ void j1App::PrepareUpdate()
 // ---------------------------------------------
 void j1App::FinishUpdate()
 {
+
+	// TODO 2: This is a good place to call load / Save functions
+	if (requested_Save) 
+	{
+		Save();
+		requested_Save = false;
+	}
+	if (requested_Load) 
+	{
+		Load();
+		requested_Load = false;
+	}
+
 }
 
 // Call modules before each loop iteration
@@ -241,3 +261,71 @@ const char* j1App::GetArgv(int index) const
 	else
 		return NULL;
 }
+
+// ---------------------------------------
+const char* j1App::GetTitle() const
+{
+	return title.GetString();
+}
+
+// ---------------------------------------
+const char* j1App::GetOrganization() const
+{
+	return organization.GetString();
+}
+
+void j1App::SaveRequest()
+{
+	requested_Save = true;
+}
+
+void j1App::LoadRequest()
+{
+	requested_Load = true;
+}
+
+void j1App::Save()
+{
+	bool ret = true;
+	p2List_item<j1Module*>* item;
+	item = modules.start;
+	pugi::xml_node saveGame = saveGame_file.append_child("save");
+	while (item != NULL && ret == true)
+	{
+		item->data->Save(saveGame.child(item->data->name.GetString()));
+		item = item->next;
+	}
+	saveGame_file.save_file("savegame.xml");
+}
+
+void j1App::Load()
+{
+	pugi::xml_parse_result result = saveGame_file.load_file("savegame.xml");
+
+	if (result == NULL)
+	{
+		LOG("Could not load map xml file config.xml. pugi error: %s", result.description());
+	}
+	else
+	{
+		saveGame = saveGame_file.child("save");
+	}
+	bool ret = true;
+	p2List_item<j1Module*>* item;
+	item = modules.start;
+
+	while (item != NULL && ret == true)
+	{
+		item->data->Load(saveGame.child(item->data->name.GetString()));
+		item = item->next;
+	}
+}
+
+
+// TODO 4: Create a simulation of the xml file to read 
+
+// TODO 5: Create a method to actually load an xml file
+// then call all the modules to load themselves
+
+// TODO 7: Create a method to save the current state
+
