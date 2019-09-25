@@ -286,13 +286,12 @@ void j1App::LoadRequest()
 
 void j1App::Save()
 {
-	bool ret = true;
 	p2List_item<j1Module*>* item;
 	item = modules.start;
 	
 	pugi::xml_document savedata;
 	pugi::xml_node save =savedata.append_child("save");
-	while (item != NULL && ret == true)
+	while (item != NULL)
 	{
 		item->data->Save(save.append_child(item->data->name.GetString()));
 		item = item->next;
@@ -312,11 +311,10 @@ void j1App::Load()
 	{
 		saveGame = saveGame_file.child("save");
 	}
-	bool ret = true;
 	p2List_item<j1Module*>* item;
 	item = modules.start;
 
-	while (item != NULL && ret == true)
+	while (item != NULL)
 	{
 		item->data->Load(saveGame.child(item->data->name.GetString()));
 		item = item->next;
