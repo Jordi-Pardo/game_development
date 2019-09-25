@@ -100,8 +100,8 @@ void j1Render::SetBackgroundColor(SDL_Color color)
 
 void j1Render::Save(pugi::xml_node& node)
 {
-		node.child("camera").attribute("x").set_value(camera.x);
-		node.child("camera").attribute("y").set_value(camera.y);
+		node.append_child("camera").append_attribute("x").set_value(camera.x);
+		node.child("camera").append_attribute("y").set_value(camera.y);
 }
 
 void j1Render::Load(pugi::xml_node& node)
