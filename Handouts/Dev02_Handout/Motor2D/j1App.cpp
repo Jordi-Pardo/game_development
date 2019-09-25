@@ -289,7 +289,7 @@ void j1App::Save()
 	bool ret = true;
 	p2List_item<j1Module*>* item;
 	item = modules.start;
-	pugi::xml_node saveGame = saveGame_file.append_child("save");
+	
 	while (item != NULL && ret == true)
 	{
 		item->data->Save(saveGame.child(item->data->name.GetString()));
@@ -304,7 +304,7 @@ void j1App::Load()
 
 	if (result == NULL)
 	{
-		LOG("Could not load map xml file config.xml. pugi error: %s", result.description());
+		LOG("Could not load map xml file savegame.xml. pugi error: %s", result.description());
 	}
 	else
 	{

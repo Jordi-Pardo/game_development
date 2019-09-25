@@ -6,22 +6,6 @@
 	<audio />
 	<scene />
 	<renderer>
-		<camera x="276" />
-		<camera y="375" />
+		<camera x="-242" y="158" />
 	</renderer>
 </save>
-<save>
-	<input />
-	<window />
-	<textures />
-	<audio />
-	<scene />
-	<renderer>
-		<camera x="16" />
-		<camera y="223" />
-	</renderer>
-</save>
-<save />
-<save />
-<save />
-<save />
