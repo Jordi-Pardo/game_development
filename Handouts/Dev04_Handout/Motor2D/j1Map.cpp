@@ -73,6 +73,7 @@ bool j1Map::Load(const char* file_name)
 
 	// TODO 4: Create and call a private function to load a tileset
 	// remember to support more any number of tilesets!
+	LoadTileset(map_file.child("map").child("tileset"));
 	
 
 	if(ret == true)
@@ -88,8 +89,39 @@ bool j1Map::Load(const char* file_name)
 
 bool j1Map::LoadMap(pugi::xml_node& map)
 {
-	map.attribute("orientation").as_string();
+	p2SString orientation = "orthogonal";
+	bool match = strcmp(orientation.GetString(), map.attribute("orientation").as_string());
+	if (match) {
+		mapNode.orientation = Orientation::OR_ORTHOGONAL;
+	}
+	p2SString render = "right-down";
+	bool match = strcmp(orientation.GetString(), map.attribute("renderorder").as_string());
+	if (match) {
+		mapNode.renderorder = Renderorder::REN_RIGHT_DOWN;
+	}
+	mapNode.width = map.attribute("width").as_int();
+	mapNode.height = map.attribute("height").as_int();
+	mapNode.tilewidth = map.attribute("tilewidth").as_int();
+	mapNode.tileheight = map.attribute("tileheight").as_int();
+	mapNode.nextobjectid = map.attribute("nextobjectid").as_int();
 	
+	return true;
+}
+
+bool j1Map::LoadTileset(pugi::xml_node& tile)
+{
+	
+	p2SString name = tile.attribute("name").as_string();
+	tileSet.firstgid = tile.attribute("firstgid").as_int();
+	tileSet.tilewidth = tile.attribute("tilewidth").as_int();
+	tileSet.tileheigth = tile.attribute("tileheigth").as_int();
+	tileSet.spacing = tile.attribute("spacing").as_int();
+	tileSet.margin = tile.attribute("margin").as_int();
+
+	p2SString image_source = tile.attribute("image_source").as_string();
+	uint image_width = tile.attribute("image_width").as_int();
+	uint image_height = tile.attribute("image_height").as_int();
+
 	return true;
 }
 

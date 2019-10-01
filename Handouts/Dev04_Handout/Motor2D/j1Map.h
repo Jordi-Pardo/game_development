@@ -76,6 +76,7 @@ public:
 
 private:
 	bool LoadMap(pugi::xml_node& map);
+	bool LoadTileset(pugi::xml_node& map);
 
 public:
 
