@@ -32,6 +32,18 @@ void j1Map::Draw()
 		return;
 
 	// TODO 5: Prepare the loop to iterate all the tiles in a layer
+	for (uint i = 0; i < data.maplayer[i]->height; i++)
+	{	
+		for (uint j = 0; j < data.maplayer[j]->width; j++)
+		{
+			int n = data.maplayer[0]->Get(j, i);
+			if (data.maplayer[0]->gid[n] != 0) {
+
+			}
+		}
+	}
+
+			
 
 	// TODO 9: Complete the draw function
 
@@ -114,9 +126,18 @@ bool j1Map::Load(const char* file_name)
 
 	// TODO 4: Iterate all layers and load each of them
 	// Load layer info ----------------------------------------------
-	MapLayer* layer = new MapLayer;
-	LoadLayer(map_file.child("map"), layer);
-	data.maplayer.add(layer);
+	pugi::xml_node layerNode;
+	for (layerNode = map_file.child("map").child("layer"); layerNode && ret; layerNode = layerNode.next_sibling("layer"))
+	{
+		MapLayer* layer = new MapLayer();
+
+		if (ret == true)
+		{
+			ret = LoadLayer(layerNode, layer);
+		}
+
+		data.maplayer.add(layer);
+	}
 
 
 	if(ret == true)
@@ -138,8 +159,8 @@ bool j1Map::Load(const char* file_name)
 
 		// TODO 4: Add info here about your loaded layers
 		// Adapt this code with your own variables
-		/*
-		p2List_item<MapLayer*>* item_layer = data.layers.start;
+		
+		p2List_item<MapLayer*>* item_layer = data.maplayer.start;
 		while(item_layer != NULL)
 		{
 			MapLayer* l = item_layer->data;
@@ -147,7 +168,7 @@ bool j1Map::Load(const char* file_name)
 			LOG("name: %s", l->name.GetString());
 			LOG("tile width: %d tile height: %d", l->width, l->height);
 			item_layer = item_layer->next;
-		}*/
+		}
 	}
 
 	map_loaded = ret;
@@ -155,9 +176,12 @@ bool j1Map::Load(const char* file_name)
 	return ret;
 }
 
+
+
 // Load map general properties
 bool j1Map::LoadMap()
 {
+
 	bool ret = true;
 	pugi::xml_node map = map_file.child("map");
 
@@ -286,25 +310,25 @@ bool j1Map::LoadTilesetImage(pugi::xml_node& tileset_node, TileSet* set)
 bool j1Map::LoadLayer(pugi::xml_node& node, MapLayer* layer)
 {
 	bool ret = true;
-	pugi::xml_node layerNode = node.child("layer");
 	if (layer == NULL)
 	{
 		LOG("Error parsing maplayer xml file: Cannot find 'layer' tag.");
 		ret = false;
 	}
 	else {
-		layer->name = layerNode.attribute("name").as_string();
-		layer->width = layerNode.attribute("width").as_int();
-		layer->height = layerNode.attribute("height").as_int();
+		layer->name = node.attribute("name").as_string();
+		layer->width = node.attribute("width").as_uint();
+		layer->height = node.attribute("height").as_uint();
 		layer->gid = new uint[layer->height * layer->width];
 		memset(layer->gid, 0, sizeof(uint) * layer->height * layer->width);
-		
-		pugi::xml_node tile = layerNode.child("data").child("tile");
+
+		pugi::xml_node tile = node.child("data").child("tile");
 		for (uint i = 0; i < layer->height * layer->width; i++)
 		{
-			layer->gid[i] = tile.attribute("gid").as_uint();
-			tile = tile.next_sibling("tile");
-
+			if (tile) {
+				layer->gid[i] = tile.attribute("gid").as_uint();
+				tile = tile.next_sibling("tile");
+			}
 		}
 	}
 	return ret;

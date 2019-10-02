@@ -14,9 +14,13 @@ struct MapLayer
 	uint width = 0u;
 	uint height = 0u;
 	uint* gid;
+	inline uint Get(int x, int y) const {
+		return (y * width) + x;
+	}
 
-};
 	// TODO 6: Short function to get the value of x,y
+};
+
 
 
 
@@ -83,6 +87,7 @@ public:
 	// Load new map
 	bool Load(const char* path);
 
+	inline uint Get(int x, int y) const;
 	// TODO 8: Create a method that translates x,y coordinates from map positions to world positions
 
 private:
