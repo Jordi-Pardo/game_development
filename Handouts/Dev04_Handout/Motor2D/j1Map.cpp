@@ -56,7 +56,16 @@ bool j1Map::CleanUp()
 
 	// TODO 2: clean up all layer data
 	// Remove all layers
+	p2List_item<MapLayer*>* layer;
+	layer = data.maplayer.start;
+	
 
+	while (item != NULL)
+	{
+		RELEASE(layer->data);
+		layer = layer->next;
+	}
+	data.maplayer.clear();
 
 	// Clean up the pugui tree
 	map_file.reset();
@@ -105,6 +114,9 @@ bool j1Map::Load(const char* file_name)
 
 	// TODO 4: Iterate all layers and load each of them
 	// Load layer info ----------------------------------------------
+	MapLayer* layer = new MapLayer;
+	LoadLayer(map_file.child("map"), layer);
+	data.maplayer.add(layer);
 
 
 	if(ret == true)
@@ -271,6 +283,29 @@ bool j1Map::LoadTilesetImage(pugi::xml_node& tileset_node, TileSet* set)
 }
 
 // TODO 3: Create the definition for a function that loads a single layer
-//bool j1Map::LoadLayer(pugi::xml_node& node, MapLayer* layer)
-//{
-//}
+bool j1Map::LoadLayer(pugi::xml_node& node, MapLayer* layer)
+{
+	bool ret = true;
+	pugi::xml_node layerNode = node.child("layer");
+	if (layer == NULL)
+	{
+		LOG("Error parsing maplayer xml file: Cannot find 'layer' tag.");
+		ret = false;
+	}
+	else {
+		layer->name = layerNode.attribute("name").as_string();
+		layer->width = layerNode.attribute("width").as_int();
+		layer->height = layerNode.attribute("height").as_int();
+		layer->gid = new uint[layer->height * layer->width];
+		memset(layer->gid, 0, sizeof(uint) * layer->height * layer->width);
+		
+		pugi::xml_node tile = layerNode.child("data").child("tile");
+		for (uint i = 0; i < layer->height * layer->width; i++)
+		{
+			layer->gid[i] = tile.attribute("gid").as_uint();
+			tile = tile.next_sibling("tile");
+
+		}
+	}
+	return ret;
+}
