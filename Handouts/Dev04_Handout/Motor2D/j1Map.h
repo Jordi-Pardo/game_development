@@ -6,50 +6,51 @@
 #include "p2Point.h"
 #include "j1Module.h"
 
-// TODO 2: Create a struct to hold information for a TileSet
-// Ignore Terrain Types and Tile Types for now, but we want the image!
+// TODO 1: Create a struct for the map layer
+// ----------------------------------------------------
+
+	// TODO 6: Short function to get the value of x,y
+
+
+
 // ----------------------------------------------------
 struct TileSet
 {
-	uint firstgid = 0u;
-	p2SString name;
-	uint tilewidth = 0u;
-	uint tileheigth = 0u;
-	uint spacing = 0u;
-	uint margin = 0u;
+	// TODO 7: Create a method that receives a tile id and returns it's Rect
 
-	p2SString image_source;
-	uint image_width = 0u;
-	uint image_height = 0u;
+	p2SString			name;
+	int					firstgid;
+	int					margin;
+	int					spacing;
+	int					tile_width;
+	int					tile_height;
+	SDL_Texture*		texture;
+	int					tex_width;
+	int					tex_height;
+	int					num_tiles_width;
+	int					num_tiles_height;
+	int					offset_x;
+	int					offset_y;
 };
 
-
-// TODO 1: Create a struct needed to hold the information to Map node
-enum Orientation
+enum MapTypes
 {
-	OR_NULL,
-	OR_ORTHOGONAL,
-	OR_ISOMETRIC,
-	OR_HEXAGONAL
+	MAPTYPE_UNKNOWN = 0,
+	MAPTYPE_ORTHOGONAL,
+	MAPTYPE_ISOMETRIC,
+	MAPTYPE_STAGGERED
 };
-
-enum Renderorder
+// ----------------------------------------------------
+struct MapData
 {
-	REN_NULL,
-	REN_RIGHT_DOWN,
-	REN_RIGHT_UP,
-	REN_LEFT_DOWN,
-	REN_LEFT_UP,
-};
-struct MapNode
-{
-	Orientation orientation = OR_NULL;
-	Renderorder renderorder = REN_NULL;
-	uint width = 0;
-	uint height = 0;
-	uint tilewidth = 0;
-	uint tileheight = 0;
-	uint nextobjectid = 0;
+	int					width;
+	int					height;
+	int					tile_width;
+	int					tile_height;
+	SDL_Color			background_color;
+	MapTypes			type;
+	p2List<TileSet*>	tilesets;
+	// TODO 2: Add a list/array of layers to the map!
 };
 
 // ----------------------------------------------------
@@ -74,21 +75,25 @@ public:
 	// Load new map
 	bool Load(const char* path);
 
+	// TODO 8: Create a method that translates x,y coordinates from map positions to world positions
+
 private:
-	bool LoadMap(pugi::xml_node& map);
-	bool LoadTileset(pugi::xml_node& map);
+
+	bool LoadMap();
+	bool LoadTilesetDetails(pugi::xml_node& tileset_node, TileSet* set);
+	bool LoadTilesetImage(pugi::xml_node& tileset_node, TileSet* set);
+	// TODO 3: Create a method that loads a single laye
+	// bool LoadLayer(pugi::xml_node& node, MapLayer* layer);
 
 public:
 
-	// TODO 1: Add your struct for map info as public for now
+	MapData data;
 
 private:
 
 	pugi::xml_document	map_file;
 	p2SString			folder;
 	bool				map_loaded;
-	MapNode				mapNode;
-	TileSet				tileSet;
 };
 
 #endif // __j1MAP_H__
