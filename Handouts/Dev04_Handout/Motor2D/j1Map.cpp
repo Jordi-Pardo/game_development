@@ -32,20 +32,32 @@ void j1Map::Draw()
 		return;
 
 	// TODO 5: Prepare the loop to iterate all the tiles in a layer
-	for (uint i = 0; i < data.maplayer[i]->height; i++)
+	int count = 0;
+	int x = 0;
+	int y = 0;
+	for (uint i = 0; i < data.maplayer[0]->height; i++)
 	{	
-		for (uint j = 0; j < data.maplayer[j]->width; j++)
+		for (uint j = 0; j < data.maplayer[0]->width; j++)
 		{
 			int n = data.maplayer[0]->Get(j, i);
-			if (data.maplayer[0]->gid[n] != 0) {
-
+			
+			if (data.maplayer[0]->gid[n] != 0) 
+			{
+				count++;
+				LOG("Gid pos: %d", data.maplayer[0]->gid[n]);
+				App->render->Blit(data.tilesets[0]->texture,x,y,&GetRectPos(data.maplayer[0]->gid[n]));
 			}
+			x += data.tile_width;
 		}
+		x = 0;
+		y += data.tile_height;
 	}
 
+	
 			
 
 	// TODO 9: Complete the draw function
+
 
 }
 
@@ -332,4 +344,29 @@ bool j1Map::LoadLayer(pugi::xml_node& node, MapLayer* layer)
 		}
 	}
 	return ret;
+}
+
+SDL_Rect j1Map::GetRectPos(int id)
+{
+
+	int i = 0;
+	int j = 0;
+	int num = 0;
+	int target = id;
+	int width = 0;
+	int height = 0;
+	for (i = 0; i < data.tilesets[0]->num_tiles_height && num < target; i++)
+	{
+
+		for (j = 0; j < data.tilesets[0]->num_tiles_width && num < target; j++)
+		{
+			num++;
+		}
+	
+	}
+	width = (j - 1) * data.tile_width + j ;
+	height = (i - 1) * data.tile_width + i;
+	LOG("Width: %d Height: %d", width, height);
+	SDL_Rect rect = {width,height,32,32};
+	return	rect;
 }

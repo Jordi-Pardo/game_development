@@ -42,6 +42,8 @@ struct TileSet
 	int					num_tiles_height;
 	int					offset_x;
 	int					offset_y;
+
+
 };
 
 enum MapTypes
@@ -62,6 +64,8 @@ struct MapData
 	MapTypes			type;
 	p2List<TileSet*>	tilesets;
 	p2List<MapLayer*>	maplayer;
+
+
 	// TODO 2: Add a list/array of layers to the map!
 };
 
@@ -97,6 +101,8 @@ private:
 	bool LoadTilesetImage(pugi::xml_node& tileset_node, TileSet* set);
 	// TODO 3: Create a method that loads a single layer
 	bool LoadLayer(pugi::xml_node& node, MapLayer* layer);
+
+	SDL_Rect GetRectPos( int id);
 
 public:
 
