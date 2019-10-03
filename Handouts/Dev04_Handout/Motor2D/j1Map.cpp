@@ -32,9 +32,9 @@ void j1Map::Draw()
 		return;
 
 	// TODO 5: Prepare the loop to iterate all the tiles in a layer
-	int count = 0;
 	int x = 0;
 	int y = 0;
+
 	for (uint i = 0; i < data.maplayer[0]->height; i++)
 	{	
 		for (uint j = 0; j < data.maplayer[0]->width; j++)
@@ -43,9 +43,7 @@ void j1Map::Draw()
 			
 			if (data.maplayer[0]->gid[n] != 0) 
 			{
-				count++;
-				LOG("Gid pos: %d", data.maplayer[0]->gid[n]);
-				App->render->Blit(data.tilesets[0]->texture,x,y,&GetRectPos(data.maplayer[0]->gid[n]));
+				App->render->Blit(data.tilesets[0]->texture,x,y,&GetRect(data.maplayer[0]->gid[n]));
 			}
 			x += data.tile_width;
 		}
@@ -53,7 +51,7 @@ void j1Map::Draw()
 		y += data.tile_height;
 	}
 
-	
+
 			
 
 	// TODO 9: Complete the draw function
@@ -346,27 +344,35 @@ bool j1Map::LoadLayer(pugi::xml_node& node, MapLayer* layer)
 	return ret;
 }
 
-SDL_Rect j1Map::GetRectPos(int id)
+SDL_Rect j1Map::GetRect(int id)
 {
 
-	int i = 0;
-	int j = 0;
-	int num = 0;
-	int target = id;
-	int width = 0;
-	int height = 0;
-	for (i = 0; i < data.tilesets[0]->num_tiles_height && num < target; i++)
-	{
+	//----NO PERFORMANCE-----
+	//int i = 0;
+	//int j = 0;
+	//int num = 0;
+	//int target = id;
+	//int width = 0;
+	//int height = 0;
+	//for (i = 0; i < data.tilesets[0]->num_tiles_height && num < target; i++)
+	//{
 
-		for (j = 0; j < data.tilesets[0]->num_tiles_width && num < target; j++)
-		{
-			num++;
-		}
-	
-	}
-	width = (j - 1) * data.tile_width + j ;
-	height = (i - 1) * data.tile_width + i;
-	LOG("Width: %d Height: %d", width, height);
+	//	for (j = 0; j < data.tilesets[0]->num_tiles_width && num < target; j++)
+	//	{
+	//		num++;
+	//	}
+	//
+	//}
+	//width = (j - 1) * data.tile_width + j ;
+	//height = (i - 1) * data.tile_width + i;
+	//SDL_Rect rect = {width,height,32,32};
+
+	//-----PERFORMANCE-----
+	int num = id;
+	int x = (num - data.tilesets[0]->firstgid) % data.tilesets[0]->num_tiles_width;
+	int y = (num - data.tilesets[0]->firstgid) / data.tilesets[0]->num_tiles_width;
+	int width = x  * data.tile_width + x+1;
+	int height = y  * data.tile_width + y+1;
 	SDL_Rect rect = {width,height,32,32};
 	return	rect;
 }

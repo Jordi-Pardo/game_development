@@ -102,7 +102,7 @@ private:
 	// TODO 3: Create a method that loads a single layer
 	bool LoadLayer(pugi::xml_node& node, MapLayer* layer);
 
-	SDL_Rect GetRectPos( int id);
+	SDL_Rect GetRect( int id);
 
 public:
 
