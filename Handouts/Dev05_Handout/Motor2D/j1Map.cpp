@@ -401,6 +401,6 @@ SDL_Rect j1Map::GetRect(TileSet* tileset, int id)
 	int y = (num - tileset->firstgid) / tileset->num_tiles_width;
 	int width = x * data.tile_width + x + tileset->margin;
 	int height = y * data.tile_width + y + tileset->spacing;
-	SDL_Rect rect = { width,height,tileset->tile_width,tileset->tile_width };
+	SDL_Rect rect = { width,height,tileset->tile_width,tileset->tile_height };
 	return	rect;
 }
