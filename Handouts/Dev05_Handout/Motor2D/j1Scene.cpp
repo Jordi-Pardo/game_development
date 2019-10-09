@@ -31,7 +31,7 @@ bool j1Scene::Awake()
 bool j1Scene::Start()
 {
 	App->map->Load("maps/iso.tmx");
-	//App->map->Load("iso.tmx");
+	//App->map->Load("maps/Idle_anim.tmx");
 	
 	return true;
 }
