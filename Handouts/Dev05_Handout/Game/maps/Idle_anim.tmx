@@ -6,6 +6,9 @@
   <property name="speed" type="float" value="3"/>
  </properties>
  <tileset firstgid="1" name="Player Sheet" tilewidth="19" tileheight="34" tilecount="880" columns="40">
+  <properties>
+   <property name="player" type="bool" value="true"/>
+  </properties>
   <image source="Player Sheet.png" width="768" height="768"/>
  </tileset>
  <layer id="1" name="Idle 1" width="1" height="1">

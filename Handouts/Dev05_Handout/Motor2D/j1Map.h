@@ -10,8 +10,8 @@
 struct MapLayer
 {
 	p2SString	name;
-	int			width;
-	int			height;
+	int			num_tile_width;
+	int			num_tile_height;
 	uint*		data;
 
 	MapLayer() : data(NULL)
@@ -24,7 +24,7 @@ struct MapLayer
 
 	// TODO 6 (old): Short function to get the value of x,y
 	inline uint Get(int x, int y) const {
-		return (y * width) + x;
+		return (y * num_tile_width) + x;
 	}
 };
 
@@ -46,6 +46,8 @@ struct TileSet
 	int					num_tiles_height;
 	int					offset_x;
 	int					offset_y;
+	bool				isPlayer;
+
 };
 
 enum MapTypes
@@ -112,6 +114,9 @@ private:
 	pugi::xml_document	map_file;
 	p2SString			folder;
 	bool				map_loaded;
+	p2List_item<MapLayer*>* lay = nullptr;
+	int					currentFrame;
+	int					maxFrames;
 };
 
 #endif // __j1MAP_H__

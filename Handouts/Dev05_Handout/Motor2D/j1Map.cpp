@@ -18,6 +18,8 @@ j1Map::~j1Map()
 // Called before render is available
 bool j1Map::Awake(pugi::xml_node& config)
 {
+	maxFrames = 5;
+	currentFrame = 0;
 	LOG("Loading Map Parser");
 	bool ret = true;
 
@@ -33,15 +35,15 @@ void j1Map::Draw()
 
 	// TODO 5(old): Prepare the loop to draw all tilesets + Blit
 	 // for now we just use the first layer and tileset
-	p2List_item<MapLayer*>* lay = data.layers.start;
+	lay = data.layers.start;
 	MapLayer* layer = lay->data;
 	TileSet* tileset = data.tilesets.start->data;
 	for (int t = 0; t < data.layers.count(); t++)
 	{
 		LOG("%d", data.layers.count());
-		for (uint i = 0; i < layer->height; i++)
+		for (uint i = 0; i < layer->num_tile_height; i++)
 		{
-			for (uint j = 0; j < layer->width; j++)
+			for (uint j = 0; j < layer->num_tile_width; j++)
 			{
 				int n = layer->Get(j, i);
 
@@ -50,14 +52,29 @@ void j1Map::Draw()
 					App->render->Blit(tileset->texture, MapToWorld(j, i).x, MapToWorld(j, i).y, &GetRect(tileset, layer->data[n]));
 				}
 			}
+
 		}
 		if (lay->next != nullptr) {
 			lay = lay->next;
 			layer = lay->data;
 		}
+	
+		//if (currentFrame == maxFrames) {
+		//	if (lay->next != nullptr) {
+		//		lay = lay->next;
+		//		layer = lay->data;
+		//		currentFrame = 0;
+		//	}
+		//	else {
+		//		lay = data.layers.start;
+		//		currentFrame = 0;
+		//	}
+		//}else{
+		//	currentFrame++;
+		//}
+		
 	}
-	
-	
+	//lay = data.layers.start;
 
 	// TODO 10(old): Complete the draw function
 }
@@ -190,7 +207,7 @@ bool j1Map::Load(const char* file_name)
 		if(ret == true)
 			data.layers.add(lay);
 	}
-
+	//lay = data.layers.start;//-----------------------REMOVE FROM HERE, CHANGE IT----------------------------------//
 	if(ret == true)
 	{
 		LOG("Successfully parsed map XML file: %s", file_name);
@@ -214,7 +231,7 @@ bool j1Map::Load(const char* file_name)
 			MapLayer* l = item_layer->data;
 			LOG("Layer ----");
 			LOG("name: %s", l->name.GetString());
-			LOG("tile width: %d tile height: %d", l->width, l->height);
+			LOG("tile width: %d tile height: %d", l->num_tile_width, l->num_tile_height);
 			item_layer = item_layer->next;
 		}
 	}
@@ -299,6 +316,13 @@ bool j1Map::LoadTilesetDetails(pugi::xml_node& tileset_node, TileSet* set)
 	set->tile_height = tileset_node.attribute("tileheight").as_int();
 	set->margin = tileset_node.attribute("margin").as_int();
 	set->spacing = tileset_node.attribute("spacing").as_int();
+	pugi::xml_node properties = tileset_node.child("properties").child("property");
+	if (strcmp(properties.attribute("name").as_string(), "player")== 0 && properties.attribute("value").as_bool() == true){
+		set->isPlayer = true;
+	}
+	else {
+		set->isPlayer = false;
+	}
 	pugi::xml_node offset = tileset_node.child("tileoffset");
 
 	if(offset != NULL)
@@ -356,8 +380,8 @@ bool j1Map::LoadLayer(pugi::xml_node& node, MapLayer* layer)
 	bool ret = true;
 
 	layer->name = node.attribute("name").as_string();
-	layer->width = node.attribute("width").as_int();
-	layer->height = node.attribute("height").as_int();
+	layer->num_tile_width = node.attribute("width").as_int();
+	layer->num_tile_height = node.attribute("height").as_int();
 	pugi::xml_node layer_data = node.child("data");
 
 	if(layer_data == NULL)
@@ -368,8 +392,8 @@ bool j1Map::LoadLayer(pugi::xml_node& node, MapLayer* layer)
 	}
 	else
 	{
-		layer->data = new uint[layer->width*layer->height];
-		memset(layer->data, 0, layer->width*layer->height);
+		layer->data = new uint[layer->num_tile_width*layer->num_tile_height];
+		memset(layer->data, 0, layer->num_tile_width*layer->num_tile_height);
 
 		int i = 0;
 		for(pugi::xml_node tile = layer_data.child("tile"); tile; tile = tile.next_sibling("tile"))
@@ -406,10 +430,21 @@ SDL_Rect j1Map::GetRect(TileSet* tileset, int id)
 
 	//-----PERFORMANCE-----
 	int num = id;
+
 	int x = (num - tileset->firstgid) % tileset->num_tiles_width;
 	int y = (num - tileset->firstgid) / tileset->num_tiles_width;
-	int width = x * data.tile_width + x + tileset->margin;
-	int height = y * data.tile_width + y + tileset->spacing;
+	int width = 0;
+	int height = 0;
+	if (tileset->isPlayer) {
+
+		width = x * data.tile_width + tileset->margin;
+		height = y * data.tile_width + tileset->spacing;
+	}
+	else {
+		width = x * data.tile_width + x + tileset->margin;
+		height = y * data.tile_width + y + tileset->spacing;
+	}
+
 	SDL_Rect rect = { width,height,tileset->tile_width,tileset->tile_height };
 	return	rect;
 }
