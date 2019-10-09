@@ -35,6 +35,21 @@ void j1Map::Draw()
 	MapLayer* layer = data.layers.start->data; // for now we just use the first layer and tileset
 	TileSet* tileset = data.tilesets.start->data;
 
+
+	for (uint i = 0; i < layer->height; i++)
+	{
+		for (uint j = 0; j < layer->width; j++)
+		{
+			int n = layer->Get(j, i);
+
+			if (layer->data[n] != 0)
+			{
+				App->render->Blit(tileset->texture, MapToWorld(j,i).x, MapToWorld(j, i).y, &GetRect(tileset,layer->data[n]));
+			}
+
+		}
+	}
+
 	// TODO 10(old): Complete the draw function
 }
 
@@ -44,6 +59,19 @@ iPoint j1Map::MapToWorld(int x, int y) const
 	// TODO 8(old): Create a method that translates x,y coordinates from map positions to world positions
 
 	// TODO 1: Add isometric map to world coordinates
+	switch (data.type)
+	{
+	case MapTypes::MAPTYPE_ORTHOGONAL:
+		ret.x = x * data.tile_width;
+		ret.y = y * data.tile_height;
+		break;
+	case MapTypes::MAPTYPE_ISOMETRIC:
+		ret.x = (x - y) * data.tile_width / 2;
+		ret.y = (x + y) * data.tile_height / 2;
+	
+		break;
+
+	}
 	return ret;
 }
 
@@ -52,17 +80,23 @@ iPoint j1Map::WorldToMap(int x, int y) const
 {
 	iPoint ret(0,0);
 	// TODO 2: Add orthographic world to map coordinates
+	switch (data.type)
+	{
+	case MapTypes::MAPTYPE_ORTHOGONAL:
+		ret.x = x / data.tile_width;
+		ret.y = y / data.tile_height;
+		break;
+	case MapTypes::MAPTYPE_ISOMETRIC:
+		ret.x = (x / data.tile_width / 2 + y / data.tile_height / 2) / 2;
+		ret.y = (y / data.tile_height / 2 - (x / data.tile_width / 2)) / 2;
+	default:
+		break;
+	}
 
 	// TODO 3: Add the case for isometric maps to WorldToMap
 	return ret;
 }
 
-SDL_Rect TileSet::GetTileRect(int id) const
-{
-	SDL_Rect rect = {0, 0, 0, 0};
-	// TODO 7(old): Create a method that receives a tile id and returns it's Rect
-	return rect;
-}
 
 // Called before quitting
 bool j1Map::CleanUp()
@@ -336,4 +370,37 @@ bool j1Map::LoadLayer(pugi::xml_node& node, MapLayer* layer)
 	}
 
 	return ret;
+}
+
+SDL_Rect j1Map::GetRect(TileSet* tileset, int id)
+{
+
+	//----NO PERFORMANCE-----
+	//int i = 0;
+	//int j = 0;
+	//int num = 0;
+	//int target = id;
+	//int width = 0;
+	//int height = 0;
+	//for (i = 0; i < data.tilesets[0]->num_tiles_height && num < target; i++)
+	//{
+
+	//	for (j = 0; j < data.tilesets[0]->num_tiles_width && num < target; j++)
+	//	{
+	//		num++;
+	//	}
+	//
+	//}
+	//width = (j - 1) * data.tile_width + j ;
+	//height = (i - 1) * data.tile_width + i;
+	//SDL_Rect rect = {width,height,32,32};
+
+	//-----PERFORMANCE-----
+	int num = id;
+	int x = (num - tileset->firstgid) % tileset->num_tiles_width;
+	int y = (num - tileset->firstgid) / tileset->num_tiles_width;
+	int width = x * data.tile_width + x + tileset->margin;
+	int height = y * data.tile_width + y + tileset->spacing;
+	SDL_Rect rect = { width,height,tileset->tile_width,tileset->tile_width };
+	return	rect;
 }
