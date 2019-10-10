@@ -37,10 +37,12 @@ void j1Map::Draw()
 	 // for now we just use the first layer and tileset
 	lay = data.layers.start;
 	MapLayer* layer = lay->data;
-	TileSet* tileset = data.tilesets.start->data;
+	tile = data.tilesets.start;
+	TileSet* tileset = tile->data;
+	
+	
 	for (int t = 0; t < data.layers.count(); t++)
-	{
-		LOG("%d", data.layers.count());
+	{	
 		for (uint i = 0; i < layer->num_tile_height; i++)
 		{
 			for (uint j = 0; j < layer->num_tile_width; j++)
@@ -48,12 +50,21 @@ void j1Map::Draw()
 				int n = layer->Get(j, i);
 
 				if (layer->data[n] != 0)
-				{
-					App->render->Blit(tileset->texture, MapToWorld(j, i).x, MapToWorld(j, i).y, &GetRect(tileset, layer->data[n]));
+				{	
+					if (layer->data[n] < tile->next->data->firstgid && layer->data[n] > tile->data->firstgid) 
+					{
+
+						
+					}
+						App->render->Blit(tileset->texture, MapToWorld(j, i).x, MapToWorld(j, i).y, &GetRect(tileset, layer->data[n]));
 				}
 			}
 
 		}
+		
+		
+
+		
 		if (lay->next != nullptr) {
 			lay = lay->next;
 			layer = lay->data;
@@ -196,6 +207,22 @@ bool j1Map::Load(const char* file_name)
 		data.tilesets.add(set);
 	}
 
+	int num = data.tilesets.count();
+	tile = data.tilesets.start;
+	array_Tileset = new TileSet[num]();
+	for (int i = 0; i < data.tilesets.count(); i++)
+	{
+		array_Tileset[i] = *tile->data;
+		if(tile->next != nullptr)
+		tile = tile->next;
+	}
+	tile = data.tilesets.start;
+	for (int i = 0; i < 4; i++)
+	{
+		LOG("%d", array_Tileset[i].firstgid);
+	}
+
+
 	// Load layer info ----------------------------------------------
 	pugi::xml_node layer;
 	for(layer = map_file.child("map").child("layer"); layer && ret; layer = layer.next_sibling("layer"))
@@ -207,7 +234,7 @@ bool j1Map::Load(const char* file_name)
 		if(ret == true)
 			data.layers.add(lay);
 	}
-	//lay = data.layers.start;//-----------------------REMOVE FROM HERE, CHANGE IT----------------------------------//
+
 	if(ret == true)
 	{
 		LOG("Successfully parsed map XML file: %s", file_name);
@@ -441,8 +468,8 @@ SDL_Rect j1Map::GetRect(TileSet* tileset, int id)
 		height = y * data.tile_width + tileset->spacing;
 	}
 	else {
-		width = x * data.tile_width + x + tileset->margin;
-		height = y * data.tile_width + y + tileset->spacing;
+		width = x * data.tile_width + (x+ tileset->margin) * tileset->margin;
+		height = y * data.tile_width + (y+ tileset->spacing) * tileset->spacing;
 	}
 
 	SDL_Rect rect = { width,height,tileset->tile_width,tileset->tile_height };

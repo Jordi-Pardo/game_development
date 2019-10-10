@@ -115,6 +115,8 @@ private:
 	p2SString			folder;
 	bool				map_loaded;
 	p2List_item<MapLayer*>* lay = nullptr;
+	p2List_item<TileSet*>* tile = nullptr;
+	TileSet* array_Tileset = nullptr;
 	int					currentFrame;
 	int					maxFrames;
 };
