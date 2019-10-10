@@ -40,7 +40,7 @@ void j1Map::Draw()
 	tile = data.tilesets.start;
 	TileSet* tileset = tile->data;
 	
-	
+	int num = 0;
 	for (int t = 0; t < data.layers.count(); t++)
 	{	
 		for (uint i = 0; i < layer->num_tile_height; i++)
@@ -51,12 +51,20 @@ void j1Map::Draw()
 
 				if (layer->data[n] != 0)
 				{	
-					if (layer->data[n] < tile->next->data->firstgid && layer->data[n] > tile->data->firstgid) 
-					{
-
-						
-					}
-						App->render->Blit(tileset->texture, MapToWorld(j, i).x, MapToWorld(j, i).y, &GetRect(tileset, layer->data[n]));
+					//if (layer->data[n] > array_Tileset[0].firstgid && layer->data[n] < array_Tileset[1].firstgid)
+					//{
+					//	num = 0;
+					//}
+					//else if (layer->data[n] > array_Tileset[1].firstgid && layer->data[n] < array_Tileset[2].firstgid) {
+					//	num = 1;
+					//}
+					//else if (layer->data[n] > array_Tileset[2].firstgid && layer->data[n] < array_Tileset[3].firstgid) {
+					//	num = 2;
+					//}
+					//else if(layer->data[n] >= array_Tileset[3].firstgid) {
+					//	num = 3;
+					//}
+						App->render->Blit(tileset->texture, MapToWorld(j, i).x, MapToWorld(j, i).y, &GetRect(tileset, layer->data[n]),3.0f);
 				}
 			}
 
