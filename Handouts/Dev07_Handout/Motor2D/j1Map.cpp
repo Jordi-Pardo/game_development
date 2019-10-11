@@ -18,8 +18,6 @@ j1Map::~j1Map()
 // Called before render is available
 bool j1Map::Awake(pugi::xml_node& config)
 {
-	maxFrames = 5;
-	currentFrame = 0;
 	LOG("Loading Map Parser");
 	bool ret = true;
 
@@ -33,124 +31,96 @@ void j1Map::Draw()
 	if(map_loaded == false)
 		return;
 
-	// TODO 5(old): Prepare the loop to draw all tilesets + Blit
-	 // for now we just use the first layer and tileset
-	lay = data.layers.start;
-	MapLayer* layer = lay->data;
-	tile = data.tilesets.start;
-	TileSet* tileset = tile->data;
-	
-	
-	for (int t = 0; t < data.layers.count(); t++)
-	{	
-		for (uint i = 0; i < layer->num_tile_height; i++)
+	// TODO 4: Make sure we draw all the layers and not just the first one
+	MapLayer* layer = this->data.layers.start->data;
+
+	for(int y = 0; y < data.height; ++y)
+	{
+		for(int x = 0; x < data.width; ++x)
 		{
-			for (uint j = 0; j < layer->num_tile_width; j++)
+			int tile_id = layer->Get(x, y);
+			if(tile_id > 0)
 			{
-				int n = layer->Get(j, i);
+				TileSet* tileset = GetTilesetFromTileId(tile_id);
+				if (tileset != nullptr)
+				{
+					SDL_Rect r = tileset->GetTileRect(tile_id);
+					iPoint pos = MapToWorld(x, y);
 
-				if (layer->data[n] != 0)
-				{	
-<<<<<<< HEAD
-					if (layer->data[n] > array_Tileset[0].firstgid && layer->data[n] < array_Tileset[1].firstgid)
-					{
-						num = 0;
-					}
-					 /* if (layer->data[n] > array_Tileset[1].firstgid && layer->data[n] < array_Tileset[2].firstgid) {
-						num = 1;
-					}*/
-					else if (layer->data[n] > array_Tileset[2].firstgid && layer->data[n] < array_Tileset[3].firstgid) {
-						num = 2;
-					}
-					else if(layer->data[n] >= array_Tileset[3].firstgid) {
-						num = 3;
-					}
-						App->render->Blit(array_Tileset[num].texture, MapToWorld(j, i).x, MapToWorld(j, i).y, &GetRect(&array_Tileset[num], layer->data[n]),3.0f);
-=======
-					if (layer->data[n] < tile->next->data->firstgid && layer->data[n] > tile->data->firstgid) 
-					{
-
-						
-					}
-						App->render->Blit(tileset->texture, MapToWorld(j, i).x, MapToWorld(j, i).y, &GetRect(tileset, layer->data[n]));
->>>>>>> parent of 4aba902... Tried to load more tilesets
+					App->render->Blit(tileset->texture, pos.x, pos.y, &r);
 				}
 			}
-
 		}
-		
-		
-
-		
-		if (lay->next != nullptr) {
-			lay = lay->next;
-			layer = lay->data;
-		}
-	
-		//if (currentFrame == maxFrames) {
-		//	if (lay->next != nullptr) {
-		//		lay = lay->next;
-		//		layer = lay->data;
-		//		currentFrame = 0;
-		//	}
-		//	else {
-		//		lay = data.layers.start;
-		//		currentFrame = 0;
-		//	}
-		//}else{
-		//	currentFrame++;
-		//}
-		
 	}
-	//lay = data.layers.start;
+}
 
-	// TODO 10(old): Complete the draw function
+TileSet* j1Map::GetTilesetFromTileId(int id) const
+{
+	// TODO 3: Complete this method so we pick the right
+	// Tileset based on a tile id
+
+	return data.tilesets.start->data;
 }
 
 iPoint j1Map::MapToWorld(int x, int y) const
 {
-	iPoint ret(0,0);
-	// TODO 8(old): Create a method that translates x,y coordinates from map positions to world positions
+	iPoint ret;
 
-	// TODO 1: Add isometric map to world coordinates
-	switch (data.type)
+	if(data.type == MAPTYPE_ORTHOGONAL)
 	{
-	case MapTypes::MAPTYPE_ORTHOGONAL:
 		ret.x = x * data.tile_width;
 		ret.y = y * data.tile_height;
-		break;
-	case MapTypes::MAPTYPE_ISOMETRIC:
-		ret.x = (x - y) * data.tile_width / 2;
-		ret.y = (x + y) * data.tile_height / 2;
-	
-		break;
-
 	}
+	else if(data.type == MAPTYPE_ISOMETRIC)
+	{
+		ret.x = (x - y) * (data.tile_width * 0.5f);
+		ret.y = (x + y) * (data.tile_height * 0.5f);
+	}
+	else
+	{
+		LOG("Unknown map type");
+		ret.x = x; ret.y = y;
+	}
+
 	return ret;
 }
-
 
 iPoint j1Map::WorldToMap(int x, int y) const
 {
 	iPoint ret(0,0);
-	// TODO 2: Add orthographic world to map coordinates
-	switch (data.type)
+
+	if(data.type == MAPTYPE_ORTHOGONAL)
 	{
-	case MapTypes::MAPTYPE_ORTHOGONAL:
 		ret.x = x / data.tile_width;
 		ret.y = y / data.tile_height;
-		break;
-	case MapTypes::MAPTYPE_ISOMETRIC:
-		ret.x = (x / data.tile_width / 2 + y / data.tile_height / 2) / 2;
-		ret.y = (y / data.tile_height / 2 - (x / data.tile_width / 2)) / 2;
-	default:
-		break;
+	}
+	else if(data.type == MAPTYPE_ISOMETRIC)
+	{
+		
+		float half_width = data.tile_width * 0.5f;
+		float half_height = data.tile_height * 0.5f;
+		ret.x = int( (x / half_width + y / half_height) / 2);
+		ret.y = int( (y / half_height - (x / half_width)) / 2);
+	}
+	else
+	{
+		LOG("Unknown map type");
+		ret.x = x; ret.y = y;
 	}
 
-	// TODO 3: Add the case for isometric maps to WorldToMap
 	return ret;
 }
 
+SDL_Rect TileSet::GetTileRect(int id) const
+{
+	int relative_id = id - firstgid;
+	SDL_Rect rect;
+	rect.w = tile_width;
+	rect.h = tile_height;
+	rect.x = margin + ((rect.w + spacing) * (relative_id % num_tiles_width));
+	rect.y = margin + ((rect.h + spacing) * (relative_id / num_tiles_width));
+	return rect;
+}
 
 // Called before quitting
 bool j1Map::CleanUp()
@@ -189,9 +159,9 @@ bool j1Map::CleanUp()
 bool j1Map::Load(const char* file_name)
 {
 	bool ret = true;
-	p2SString tmp("%s%s", folder.GetString(), file_name);
+	p2SString tmp("maps\\%s", folder.GetString(), file_name);
 
-	pugi::xml_parse_result result = map_file.load_file(file_name);
+	pugi::xml_parse_result result = map_file.load_file("maps/iso_walk.tmx");
 
 	if(result == NULL)
 	{
@@ -223,22 +193,6 @@ bool j1Map::Load(const char* file_name)
 
 		data.tilesets.add(set);
 	}
-
-	int num = data.tilesets.count();
-	tile = data.tilesets.start;
-	array_Tileset = new TileSet[num]();
-	for (int i = 0; i < data.tilesets.count(); i++)
-	{
-		array_Tileset[i] = *tile->data;
-		if(tile->next != nullptr)
-		tile = tile->next;
-	}
-	tile = data.tilesets.start;
-	for (int i = 0; i < 4; i++)
-	{
-		LOG("%d", array_Tileset[i].firstgid);
-	}
-
 
 	// Load layer info ----------------------------------------------
 	pugi::xml_node layer;
@@ -275,7 +229,7 @@ bool j1Map::Load(const char* file_name)
 			MapLayer* l = item_layer->data;
 			LOG("Layer ----");
 			LOG("name: %s", l->name.GetString());
-			LOG("tile width: %d tile height: %d", l->num_tile_width, l->num_tile_height);
+			LOG("tile width: %d tile height: %d", l->width, l->height);
 			item_layer = item_layer->next;
 		}
 	}
@@ -360,13 +314,6 @@ bool j1Map::LoadTilesetDetails(pugi::xml_node& tileset_node, TileSet* set)
 	set->tile_height = tileset_node.attribute("tileheight").as_int();
 	set->margin = tileset_node.attribute("margin").as_int();
 	set->spacing = tileset_node.attribute("spacing").as_int();
-	pugi::xml_node properties = tileset_node.child("properties").child("property");
-	if (strcmp(properties.attribute("name").as_string(), "player")== 0 && properties.attribute("value").as_bool() == true){
-		set->isPlayer = true;
-	}
-	else {
-		set->isPlayer = false;
-	}
 	pugi::xml_node offset = tileset_node.child("tileoffset");
 
 	if(offset != NULL)
@@ -424,8 +371,9 @@ bool j1Map::LoadLayer(pugi::xml_node& node, MapLayer* layer)
 	bool ret = true;
 
 	layer->name = node.attribute("name").as_string();
-	layer->num_tile_width = node.attribute("width").as_int();
-	layer->num_tile_height = node.attribute("height").as_int();
+	layer->width = node.attribute("width").as_int();
+	layer->height = node.attribute("height").as_int();
+	LoadProperties(node, layer->properties);
 	pugi::xml_node layer_data = node.child("data");
 
 	if(layer_data == NULL)
@@ -436,8 +384,8 @@ bool j1Map::LoadLayer(pugi::xml_node& node, MapLayer* layer)
 	}
 	else
 	{
-		layer->data = new uint[layer->num_tile_width*layer->num_tile_height];
-		memset(layer->data, 0, layer->num_tile_width*layer->num_tile_height);
+		layer->data = new uint[layer->width*layer->height];
+		memset(layer->data, 0, layer->width*layer->height);
 
 		int i = 0;
 		for(pugi::xml_node tile = layer_data.child("tile"); tile; tile = tile.next_sibling("tile"))
@@ -449,46 +397,13 @@ bool j1Map::LoadLayer(pugi::xml_node& node, MapLayer* layer)
 	return ret;
 }
 
-SDL_Rect j1Map::GetRect(TileSet* tileset, int id)
+// Load a group of properties from a node and fill a list with it
+bool j1Map::LoadProperties(pugi::xml_node& node, Properties& properties)
 {
+	bool ret = false;
 
-	//----NO PERFORMANCE-----
-	//int i = 0;
-	//int j = 0;
-	//int num = 0;
-	//int target = id;
-	//int width = 0;
-	//int height = 0;
-	//for (i = 0; i < data.tilesets[0]->num_tiles_height && num < target; i++)
-	//{
+	// TODO 6: Fill in the method to fill the custom properties from 
+	// an xml_node
 
-	//	for (j = 0; j < data.tilesets[0]->num_tiles_width && num < target; j++)
-	//	{
-	//		num++;
-	//	}
-	//
-	//}
-	//width = (j - 1) * data.tile_width + j ;
-	//height = (i - 1) * data.tile_width + i;
-	//SDL_Rect rect = {width,height,32,32};
-
-	//-----PERFORMANCE-----
-	int num = id;
-
-	int x = (num - tileset->firstgid) % tileset->num_tiles_width;
-	int y = (num - tileset->firstgid) / tileset->num_tiles_width;
-	int width = 0;
-	int height = 0;
-	if (tileset->isPlayer) {
-
-		width = x * data.tile_width + tileset->margin;
-		height = y * data.tile_width + tileset->spacing;
-	}
-	else {
-		width = x * data.tile_width + (x+ tileset->margin) * tileset->margin;
-		height = y * data.tile_width + (y+ tileset->spacing) * tileset->spacing;
-	}
-
-	SDL_Rect rect = { width,height,tileset->tile_width,tileset->tile_height };
-	return	rect;
+	return ret;
 }
