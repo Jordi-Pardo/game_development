@@ -32,34 +32,57 @@ void j1Map::Draw()
 		return;
 
 	// TODO 4: Make sure we draw all the layers and not just the first one
-	MapLayer* layer = this->data.layers.start->data;
-
-	for(int y = 0; y < data.height; ++y)
+	p2List_item<MapLayer*>* lay = this->data.layers.start;
+	MapLayer* layer = lay->data;
+	for (int i = 0; i < data.layers.count(); i++)
 	{
-		for(int x = 0; x < data.width; ++x)
+		for (int y = 0; y < data.height; ++y)
 		{
-			int tile_id = layer->Get(x, y);
-			if(tile_id > 0)
+			for (int x = 0; x < data.width; ++x)
 			{
-				TileSet* tileset = GetTilesetFromTileId(tile_id);
-				if (tileset != nullptr)
+				int tile_id = layer->Get(x, y);
+				if (tile_id > 0)
 				{
-					SDL_Rect r = tileset->GetTileRect(tile_id);
-					iPoint pos = MapToWorld(x, y);
 
-					App->render->Blit(tileset->texture, pos.x, pos.y, &r);
+					TileSet* tileset = GetTilesetFromTileId(tile_id);
+					if (tileset != nullptr)
+					{
+						SDL_Rect r = tileset->GetTileRect(tile_id);
+						iPoint pos = MapToWorld(x, y);
+
+						App->render->Blit(tileset->texture, pos.x, pos.y, &r);
+					}
 				}
 			}
 		}
+		if (lay != nullptr) {
+			lay = lay->next;
+			layer = lay->data;
+		}
 	}
+	
+
 }
+
 
 TileSet* j1Map::GetTilesetFromTileId(int id) const
 {
 	// TODO 3: Complete this method so we pick the right
+	bool ret = false;
+	p2List_item<TileSet*>* tile = nullptr;
+	tile = data.tilesets.start;
+	while (ret == false) {
+		if (tile->next != NULL && tile->next->data->firstgid <= id) {
+			tile = tile->next;
+		}
+		else if (tile->prev != NULL && tile->data->firstgid > id) {
+			tile = tile->prev;
+		}
+		else ret = true;
+	}
 	// Tileset based on a tile id
 
-	return data.tilesets.start->data;
+	return tile->data;
 }
 
 iPoint j1Map::MapToWorld(int x, int y) const
@@ -161,7 +184,7 @@ bool j1Map::Load(const char* file_name)
 	bool ret = true;
 	p2SString tmp("maps\\%s", folder.GetString(), file_name);
 
-	pugi::xml_parse_result result = map_file.load_file("maps/iso_walk.tmx");
+	pugi::xml_parse_result result = map_file.load_file(file_name);
 
 	if(result == NULL)
 	{
