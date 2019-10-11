@@ -55,7 +55,7 @@ void j1Map::Draw()
 				}
 			}
 		}
-		if (lay != nullptr) {
+		if (lay->next != nullptr) {
 			lay = lay->next;
 			layer = lay->data;
 		}
