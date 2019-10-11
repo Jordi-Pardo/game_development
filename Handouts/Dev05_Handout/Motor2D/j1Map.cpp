@@ -51,20 +51,20 @@ void j1Map::Draw()
 
 				if (layer->data[n] != 0)
 				{	
-					if (layer->data[n] > array_Tileset[0].firstgid && layer->data[n] < array_Tileset[1].firstgid)
-					{
-						num = 0;
-					}
-					 /* if (layer->data[n] > array_Tileset[1].firstgid && layer->data[n] < array_Tileset[2].firstgid) {
-						num = 1;
-					}*/
-					else if (layer->data[n] > array_Tileset[2].firstgid && layer->data[n] < array_Tileset[3].firstgid) {
-						num = 2;
-					}
-					else if(layer->data[n] >= array_Tileset[3].firstgid) {
-						num = 3;
-					}
-						App->render->Blit(array_Tileset[num].texture, MapToWorld(j, i).x, MapToWorld(j, i).y, &GetRect(&array_Tileset[num], layer->data[n]),3.0f);
+					//if (layer->data[n] > array_Tileset[0].firstgid && layer->data[n] < array_Tileset[1].firstgid)
+					//{
+					//	num = 0;
+					//}
+					//else if (layer->data[n] > array_Tileset[1].firstgid && layer->data[n] < array_Tileset[2].firstgid) {
+					//	num = 1;
+					//}
+					//else if (layer->data[n] > array_Tileset[2].firstgid && layer->data[n] < array_Tileset[3].firstgid) {
+					//	num = 2;
+					//}
+					//else if(layer->data[n] >= array_Tileset[3].firstgid) {
+					//	num = 3;
+					//}
+						App->render->Blit(tileset->texture, MapToWorld(j, i).x, MapToWorld(j, i).y, &GetRect(tileset, layer->data[n]),3.0f);
 				}
 			}
 
