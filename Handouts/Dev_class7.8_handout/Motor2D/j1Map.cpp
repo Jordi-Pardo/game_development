@@ -38,7 +38,7 @@ void j1Map::ResetPath()
 	frontier.Clear();
 	visited.clear();
 	breadcrumbs.clear();
-	frontier.Push(iPoint(19, 4), 0);
+	frontier.Push(iPoint(19, 4), 3 );
 	visited.add(iPoint(19, 4));
 	breadcrumbs.add(iPoint(19, 4));
 	memset(cost_so_far, 0, sizeof(uint) * COST_MAP * COST_MAP);
@@ -51,24 +51,57 @@ void j1Map::Path(int x, int y)
 	iPoint origin = visited.start->data;
 	int pos = visited.find(goal);
 
-	for (int i = 0; i < visited.count(); i++)
-	{
-		if (breadcrumbs[pos] != origin) {
-			path.PushBack(breadcrumbs[pos]);
-			
+		path.PushBack(goal);
+		if (pos != -1) {
+			for (int i = 0; i < visited.count(); i++)
+			{
+				if (visited[pos] != origin) {
+					path.PushBack(breadcrumbs[pos]);
+					pos = visited.find(breadcrumbs[pos]);
+				}
+			}
+
+			LOG("Path count: %i", path.Count());
+			LOG("Array pos: %i", pos);
+			LOG("Goal: X: %i Y: %i", visited[pos].x, visited[pos].y);
+			LOG("BreadCrumb: X: %i Y: %i", breadcrumbs[pos].x, breadcrumbs[pos].y);
 		}
-	}
-	path.PushBack(breadcrumbs[pos]);
-	LOG("Selected: X: %i Y: %i",visited[pos].x,visited[pos].y);
-	iPoint BreadCrumb = breadcrumbs[pos];
-	LOG("BreadCrumb: X: %i Y: %i",breadcrumbs[pos].x,breadcrumbs[pos].y);
-	
 	// TODO 2: Follow the breadcrumps to goal back to the origin
 	// add each step into "path" dyn array (it will then draw automatically)
 }
 
 void j1Map::PropagateDijkstra()
 {
+	// TODO 1: Record the direction to the previous node 
+// with the new list "breadcrumps"
+	iPoint curr;
+
+	if (frontier.Pop(curr))
+	{
+		iPoint neighbors[4];
+		neighbors[0].create(curr.x + 1, curr.y + 0);
+		neighbors[1].create(curr.x + 0, curr.y + 1);
+		neighbors[2].create(curr.x - 1, curr.y + 0);
+		neighbors[3].create(curr.x + 0, curr.y - 1);
+		int num = 0;
+		for (uint i = 0; i < 4; ++i)
+		{
+			if (int new_cost = MovementCost(neighbors[i].x, neighbors[i].y) > 0)
+			{
+				if (visited.find(neighbors[i]) == -1)
+				{
+					if (cost_so_far[neighbors[i].x][neighbors[i].y] == 0 || new_cost < cost_so_far[neighbors[i].x][neighbors[i].y]) {
+						cost_so_far[neighbors[i].x][neighbors[i].y] = new_cost;
+						frontier.Push(neighbors[i], new_cost);
+						visited.add(neighbors[i]);
+						breadcrumbs.add(curr);
+					}
+				}
+			
+			}
+		}
+		LOG("Higher tiles: %i", num);
+	}
 	// TODO 3: Taking BFS as a reference, implement the Dijkstra algorithm
 	// use the 2 dimensional array "cost_so_far" to track the accumulated costs
 	// on each cell (is already reset to 0 automatically)
@@ -237,7 +270,8 @@ iPoint j1Map::MapToWorld(int x, int y) const
 	}
 	else if(data.type == MAPTYPE_ISOMETRIC)
 	{
-		ret.x = (x - y) * (data.tile_width * 0.5f);
+		ret.x = (x - y) 
+			* (data.tile_width * 0.5f);
 		ret.y = (x + y) * (data.tile_height * 0.5f);
 	}
 	else
